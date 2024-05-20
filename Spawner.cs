@@ -20,7 +20,7 @@ public class CubeSpawner : MonoBehaviour
     private Cube CreateCube()
     {
         Cube cube = Instantiate(_cubePrefab);
-        cube.SetPool(_cubePool);
+        cube.OnCubeDestroyed += HandleCubeDestroyed;
         return cube;
     }
 
@@ -49,5 +49,10 @@ public class CubeSpawner : MonoBehaviour
 
         Cube cube = _cubePool.Get();
         cube.transform.position = spawnPosition;
+    }
+
+    private void HandleCubeDestroyed(Cube cube)
+    {
+        _cubePool.Release(cube);
     }
 }

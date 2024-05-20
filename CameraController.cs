@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+sealed class CameraController : MonoBehaviour
 {
     [SerializeField] private float _movementSpeed = 10f;
     [SerializeField] private float _mouseSensitivity = 100f;
@@ -8,13 +8,13 @@ public class CameraController : MonoBehaviour
     private float _rotationY = 0f;
     private float _rotationX = 0f;
 
-    void Start()
+    private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    void Update()
+    private void Update()
     {
         HandleMovement();
         HandleMouseLook();

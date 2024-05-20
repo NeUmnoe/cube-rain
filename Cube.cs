@@ -1,20 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
+
+[RequireComponent(typeof(Renderer))]
+[RequireComponent(typeof(BoxCollider))]
+[RequireComponent(typeof(Rigidbody))]
 
 public class Cube : MonoBehaviour
 {
     private Renderer _renderer;
-    private IObjectPool<Cube> _pool;
     private HashSet<Platform> _collidedPlatforms;
     private static readonly float _minLifetime = 2f;
     private static readonly float _maxLifetime = 5f;
 
-    public void SetPool(IObjectPool<Cube> objectPool)
-    {
-        _pool = objectPool;
-    }
+    public event Action<Cube> OnCubeDestroyed;
 
     private void Awake()
     {
@@ -29,24 +29,26 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Platform platform = collision.gameObject.GetComponent<Platform>();
-        if (platform != null && !_collidedPlatforms.Contains(platform))
+        if (collision.gameObject.TryGetComponent(out Platform platform))
         {
-            _collidedPlatforms.Add(platform);
-            ChangeColor();
-            float lifetime = Random.Range(_minLifetime, _maxLifetime);
-            StartCoroutine(DestroyAfterTime(lifetime));
+            if (!_collidedPlatforms.Contains(platform))
+            {
+                _collidedPlatforms.Add(platform);
+                ChangeColor();
+                float lifetime = UnityEngine.Random.Range(_minLifetime, _maxLifetime);
+                StartCoroutine(DestroyAfterTime(lifetime));
+            }
         }
     }
 
     private void ChangeColor()
     {
-        _renderer.material.color = Random.ColorHSV();
+        _renderer.material.color = UnityEngine.Random.ColorHSV();
     }
 
     private IEnumerator DestroyAfterTime(float time)
     {
         yield return new WaitForSeconds(time);
-        _pool.Release(this);
+        OnCubeDestroyed?.Invoke(this);
     }
 }
